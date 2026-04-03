@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    color: white;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #1a0f6f);
+    background-size: 400% 400%;
+    animation: gradient 10s ease infinite;
+}
+
+@keyframes gradient {
+    0% {background-position: 0%}
+    50% {background-position: 100%}
+    100% {background-position: 0%}
+}
+
+.container {
+    width: 350px;
+    padding: 30px;
+    border-radius: 16px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+    text-align: center;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #3533cd, #1a0f6f);
+    color: white;
+    cursor: pointer;
+}
+
+.switch {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #ccc;
+    cursor: pointer;
+}
+
+#error {
+    font-size: 13px;
+}
+
+.hidden { display: none; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1 id="title">Register</h1>
+<p id="error"></p>
+
+<!-- REGISTER -->
+<div id="registerBox">
+<input type="text" id="regUser" placeholder="Username">
+<input type="email" id="regEmail" placeholder="Email">
+<input type="password" id="regPass" placeholder="Password">
+<button onclick="register()">Register</button>
+<p class="switch" onclick="toggle()">Already have an account? Login</p>
+</div>
+
+<!-- LOGIN -->
+<div id="loginBox" class="hidden">
+<input type="text" id="logUser" placeholder="Username">
+<input type="password" id="logPass" placeholder="Password">
+<button onclick="login()">Login</button>
+<p class="switch" onclick="toggle()">Don't have an account? Register</p>
+</div>
+
+</div>
+
+<script>
+// STORAGE FUNCTIONS
+function getAccounts(){
+    return JSON.parse(localStorage.getItem("accounts")) || [];
+}
+
+function saveAccounts(accounts){
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+}
+
+// SWITCH UI
+function toggle(){
+    registerBox.classList.toggle("hidden");
+    loginBox.classList.toggle("hidden");
+
+    title.textContent = title.textContent === "Register" ? "Login" : "Register";
+    error.textContent = "";
+}
+
+// REGISTER
+function register(){
+    let user = regUser.value.trim();
+    let email = regEmail.value.trim();
+    let pass = regPass.value.trim();
+
+    error.style.color = "red";
+
+    if(!user || !email || !pass){
+        error.textContent = "Fill all fields";
+        return;
+    }
+
+    let accounts = getAccounts();
+
+    if(accounts.some(acc => acc.user === user)){
+        error.textContent = "Username already exists";
+        return;
+    }
+
+    accounts.push({ user, email, pass });
+    saveAccounts(accounts);
+
+    error.style.color = "lime";
+    error.textContent = "Account created! Login now";
+}
+
+// LOGIN
+function login(){
+    let user = logUser.value.trim();
+    let pass = logPass.value.trim();
+
+    let accounts = getAccounts();
+    let found = accounts.find(acc => acc.user === user && acc.pass === pass);
+
+    if(found){
+        error.style.color = "lime";
+        error.textContent = "Logging in...";
+
+        // SAVE SESSION
+        localStorage.setItem("loggedInUser", user);
+
+        setTimeout(()=>{
+            window.location.href = "https://sites.google.com/view/ptb-project-toolbox/home";
+        },1000);
+
+    } else {
+        error.style.color = "red";
+        error.textContent = "Invalid login";
+    }
+}
+
+// AUTO LOGIN REDIRECT
+window.onload = function(){
+    let logged = localStorage.getItem("loggedInUser");
+
+    if(logged){
+        window.location.href = "https://sites.google.com/view/ptb-project-toolbox/home";
+    }
+}
+</script>
+
+</body>
+</html>
