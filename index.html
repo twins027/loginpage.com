@@ -52,6 +52,7 @@ button {
     background: linear-gradient(90deg, #3533cd, #1a0f6f);
     color: white;
     cursor: pointer;
+    margin-top: 5px;
 }
 
 .switch {
@@ -73,10 +74,11 @@ button {
 
 <div class="container">
 
+<!-- AUTH SECTION -->
+<div id="authSection">
 <h1 id="title">Register</h1>
 <p id="error"></p>
 
-<!-- REGISTER -->
 <div id="registerBox">
 <input type="text" id="regUser" placeholder="Username">
 <input type="email" id="regEmail" placeholder="Email">
@@ -85,18 +87,27 @@ button {
 <p class="switch" onclick="toggle()">Already have an account? Login</p>
 </div>
 
-<!-- LOGIN -->
 <div id="loginBox" class="hidden">
 <input type="text" id="logUser" placeholder="Username">
 <input type="password" id="logPass" placeholder="Password">
 <button onclick="login()">Login</button>
 <p class="switch" onclick="toggle()">Don't have an account? Register</p>
 </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden">
+<h1 id="welcome"></h1>
+
+<button onclick="goSite()">Go to Toolbox</button>
+<br>
+<button onclick="logout()">Logout</button>
+</div>
 
 </div>
 
 <script>
-// STORAGE FUNCTIONS
+// STORAGE
 function getAccounts(){
     return JSON.parse(localStorage.getItem("accounts")) || [];
 }
@@ -105,7 +116,7 @@ function saveAccounts(accounts){
     localStorage.setItem("accounts", JSON.stringify(accounts));
 }
 
-// SWITCH UI
+// SWITCH LOGIN/REGISTER
 function toggle(){
     registerBox.classList.toggle("hidden");
     loginBox.classList.toggle("hidden");
@@ -150,28 +161,39 @@ function login(){
     let found = accounts.find(acc => acc.user === user && acc.pass === pass);
 
     if(found){
-        error.style.color = "lime";
-        error.textContent = "Logging in...";
-
-        // SAVE SESSION
         localStorage.setItem("loggedInUser", user);
-
-        setTimeout(()=>{
-            window.location.href = "https://sites.google.com/view/ptb-project-toolbox/home";
-        },1000);
-
+        showDashboard(user);
     } else {
         error.style.color = "red";
         error.textContent = "Invalid login";
     }
 }
 
-// AUTO LOGIN REDIRECT
-window.onload = function(){
-    let logged = localStorage.getItem("loggedInUser");
+// SHOW DASHBOARD
+function showDashboard(user){
+    authSection.classList.add("hidden");
+    dashboard.classList.remove("hidden");
 
-    if(logged){
-        window.location.href = "https://sites.google.com/view/ptb-project-toolbox/home";
+    welcome.textContent = "Welcome " + user;
+}
+
+// LOGOUT
+function logout(){
+    localStorage.removeItem("loggedInUser");
+    location.reload();
+}
+
+// GO TO YOUR SITE
+function goSite(){
+    window.location.href = "https://sites.google.com/view/ptb-project-toolbox/home";
+}
+
+// AUTO LOGIN
+window.onload = function(){
+    let user = localStorage.getItem("loggedInUser");
+
+    if(user){
+        showDashboard(user);
     }
 }
 </script>
